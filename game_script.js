@@ -12,8 +12,11 @@ var topMargin = 90
 var boardWidth = 460
 var boardHeight = 460
 
-var wUnit = boardWidth / 50
-var hUnit = boardHeight / 50
+var wUnit = Math.floor(boardWidth / 50)
+var hUnit = Math.floor(boardHeight / 50)
+
+var treatSize = 2
+var numTreats = 5
 
 var score = 0
 
@@ -22,6 +25,16 @@ var snakeY = 100
 var xVel = 1
 var yVel = 0
 
+var levelTreats = []
+
+for (var i = 0; i < numTreats; i++) {
+    var newTreat = {
+        x: getRandomInt ((0 + wUnit), ((boardWidth - treatSize * wUnit) - wUnit)),
+        y: getRandomInt ((0 + hUnit), ((boardHeight - treatSize * hUnit) - hUnit)),
+    }
+
+    levelTreats.push(newTreat)
+}
 
 /**
  * Returns a random integer between min (inclusive) and max (inclusive)
@@ -45,6 +58,22 @@ function drawBoard() {
     ctx.strokeStyle = "rgba(0, 0, 255, 0.5)";
     ctx.stroke();
     ctx.closePath();
+}
+
+function drawTreats() {
+    levelTreats.forEach(function (val, key) {
+        drawTreat(val)
+    })
+}
+
+function drawTreat(treat) {
+    ctx.beginPath();
+//    ctx.arc(leftMargin, topMargin, wUnit, 0, Math.PI*2, false);
+    ctx.rect(leftMargin + treat.x, topMargin + treat.y, wUnit * treatSize, hUnit * treatSize)
+    ctx.fillStyle = "green";
+    ctx.fill();
+    ctx.closePath();
+
 }
 
 function drawSnake() {
@@ -92,6 +121,8 @@ function draw() {
         drawBoard()
 
         drawSnake()
+        drawTreats()
+
 
         drawScore()
     }
@@ -210,7 +241,7 @@ function checkWallCollide() {
         gameState = "lose"
     }
 
-    if (snakeX >= leftMargin + boardWidth) {
+    if (snakeX + wUnit >= leftMargin + boardWidth) {
         gameState = "lose"
     }
 
@@ -218,7 +249,7 @@ function checkWallCollide() {
         gameState = "lose"
     }
 
-    if (snakeY >= topMargin + boardHeight) {
+    if (snakeY + hUnit >= topMargin + boardHeight) {
         gameState = "lose"
     }
 }
