@@ -25,20 +25,27 @@ var snakeY = 100
 var snakeSpeed = 3
 var xVel = snakeSpeed
 var yVel = 0
+var snakePos = []
+var snakeLen = 1
 
 var levelTreats = []
 
-for (var i = 0; i < numTreats; i++) {
-    tx = getRandomInt ((0 + wUnit), ((boardWidth - treatSize * wUnit) - wUnit))
-    ty = getRandomInt ((0 + hUnit), ((boardHeight - treatSize * hUnit) - hUnit))
-    var newTreat = {
-        x: tx + leftMargin,
-        y: ty + topMargin,
-        eaten: false
-    }
+function setTreats() {
+    levelTreats = []
+    for (var i = 0; i < numTreats; i++) {
+        tx = getRandomInt ((0 + wUnit), ((boardWidth - treatSize * wUnit) - wUnit))
+        ty = getRandomInt ((0 + hUnit), ((boardHeight - treatSize * hUnit) - hUnit))
+        var newTreat = {
+            x: tx + leftMargin,
+            y: ty + topMargin,
+            eaten: false
+        }
 
-    levelTreats.push(newTreat)
+        levelTreats.push(newTreat)
+    }
 }
+
+setTreats()
 
 /**
  * Returns a random integer between min (inclusive) and max (inclusive)
@@ -83,11 +90,13 @@ function drawTreat(treat) {
 }
 
 function drawSnake() {
-    ctx.beginPath();
-    ctx.rect(snakeX, snakeY, wUnit, hUnit);
-    ctx.fillStyle = "#FF0000";
-    ctx.fill();
-    ctx.closePath();
+    snakePos.forEach(function (val, key) {
+        ctx.beginPath();
+        ctx.rect(val.x, val.y, wUnit, hUnit);
+        ctx.fillStyle = "#FF0000";
+        ctx.fill();
+        ctx.closePath();
+    })
 
 }
 
@@ -95,8 +104,23 @@ function moveSnake() {
     snakeX += xVel
     snakeY += yVel
 
+    currSnake = {
+        x: snakeX,
+        y: snakeY
+    }
+
+    snakePos.push(currSnake)
+
+    if (snakePos.length > snakeLen) {
+        snakePos.shift()
+    }
+
     checkWallCollide()
     checkTreatCollide()
+console.log("treat gone?", checkTreatGone())
+    if  (checkTreatGone()) {
+        setTreats()
+    }
 }
 
 function drawWin() {
@@ -270,7 +294,19 @@ function checkTreatCollide() {
                 && snakeY + wUnit >= val.y
                 && snakeY <= val.y + treatSize * hUnit) {
                 val.eaten = true
+                score += snakeLen
+                snakeLen ++
             }
         }
     })
+}
+
+function checkTreatGone() {
+    var rtn = true
+    levelTreats.forEach(function (val, key) {
+        if (!val.eaten) {
+            rtn = false
+        }
+    })
+    return rtn
 }
