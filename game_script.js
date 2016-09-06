@@ -22,15 +22,19 @@ var score = 0
 
 var snakeX = 260
 var snakeY = 100
-var xVel = 1
+var snakeSpeed = 3
+var xVel = snakeSpeed
 var yVel = 0
 
 var levelTreats = []
 
 for (var i = 0; i < numTreats; i++) {
+    tx = getRandomInt ((0 + wUnit), ((boardWidth - treatSize * wUnit) - wUnit))
+    ty = getRandomInt ((0 + hUnit), ((boardHeight - treatSize * hUnit) - hUnit))
     var newTreat = {
-        x: getRandomInt ((0 + wUnit), ((boardWidth - treatSize * wUnit) - wUnit)),
-        y: getRandomInt ((0 + hUnit), ((boardHeight - treatSize * hUnit) - hUnit)),
+        x: tx + leftMargin,
+        y: ty + topMargin,
+        eaten: false
     }
 
     levelTreats.push(newTreat)
@@ -62,14 +66,16 @@ function drawBoard() {
 
 function drawTreats() {
     levelTreats.forEach(function (val, key) {
-        drawTreat(val)
+        if (!val.eaten) {
+            drawTreat(val)
+        }
     })
 }
 
 function drawTreat(treat) {
     ctx.beginPath();
 //    ctx.arc(leftMargin, topMargin, wUnit, 0, Math.PI*2, false);
-    ctx.rect(leftMargin + treat.x, topMargin + treat.y, wUnit * treatSize, hUnit * treatSize)
+    ctx.rect(treat.x, treat.y, wUnit * treatSize, hUnit * treatSize)
     ctx.fillStyle = "green";
     ctx.fill();
     ctx.closePath();
@@ -90,6 +96,7 @@ function moveSnake() {
     snakeY += yVel
 
     checkWallCollide()
+    checkTreatCollide()
 }
 
 function drawWin() {
@@ -115,7 +122,6 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     if (gameState == "active") {
-        console.log("Game State: ", gameState)
         moveSnake()
 
         drawBoard()
@@ -139,7 +145,7 @@ function draw() {
 }
 
 
-setInterval(draw, 10);
+setInterval(draw, 1000/30);
 
 document.addEventListener("keydown", keyDownHandler, false);
 
@@ -148,8 +154,8 @@ function keyDownHandler(e) {
         // Left
         case 65:
         case 37:
-            if (xVel != 1) {
-                xVel = -1
+            if (xVel != snakeSpeed) {
+                xVel = -snakeSpeed
                 yVel = 0
             }
             break
@@ -157,17 +163,17 @@ function keyDownHandler(e) {
         // Down
         case 83:
         case 40:
-            if (yVel != -1) {
+            if (yVel != -snakeSpeed) {
                 xVel = 0
-                yVel = 1
+                yVel = snakeSpeed
             }
             break
 
         // Right
         case 68:
         case 39:
-            if (xVel != -1) {
-                xVel = 1
+            if (xVel != -snakeSpeed) {
+                xVel = snakeSpeed
                 yVel = 0
             }
             break
@@ -175,9 +181,9 @@ function keyDownHandler(e) {
         // Up
         case 87:
         case 38:
-            if (yVel != 1) {
+            if (yVel != snakeSpeed) {
                 xVel = 0
-                yVel = -1
+                yVel = -snakeSpeed
             }
             break
 
@@ -252,4 +258,19 @@ function checkWallCollide() {
     if (snakeY + hUnit >= topMargin + boardHeight) {
         gameState = "lose"
     }
+}
+
+function checkTreatCollide() {
+    // Need to go through treat array and "remove" any that the snake touches.
+
+    levelTreats.forEach(function (val, key) {
+        if (!val.eaten) {
+            if (snakeX + wUnit >= val.x
+                && snakeX <= val.x + treatSize * wUnit
+                && snakeY + wUnit >= val.y
+                && snakeY <= val.y + treatSize * hUnit) {
+                val.eaten = true
+            }
+        }
+    })
 }
