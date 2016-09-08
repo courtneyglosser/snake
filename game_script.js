@@ -133,6 +133,7 @@ function drawLose() {
     ctx.font = "26px Arial";
     ctx.fillStyle = "#0095DD";
     ctx.fillText("Loser :( ", canvas.width / 2 - 20, canvas.height / 2);
+    ctx.fillText("Final Score:  " + score, canvas.width / 2 - 60, canvas.height / 2 + 100);
 }
 
 function drawPause() {
